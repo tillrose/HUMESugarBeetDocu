@@ -2,7 +2,7 @@
 title: "Simulation of sugar beet growth"
 author: "Agronomy CAU Kiel"
 date: "`r Sys.Date()`"
-output: github_document
+output: html_document
 bibliography: LitKage.bib
 csl: european-journal-of-agronomy.csl
 editor_options: 
