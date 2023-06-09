@@ -31,4 +31,4 @@ Note that the `echo = FALSE` parameter was added to the code chunk to prevent pr
 
 ## Including Equations
 
-$$D{{M}_{total}}=D{{M}_{root}}+D{{M}_{leaf}}+D{{M}_{petiole}}$$
+$$DM_{total}=DM_{root}+DM_{leaf}+DM_{petiole}$$

@@ -36,4 +36,4 @@ prevent printing of the R code that generated the plot.
 
 ## Including Equations
 
-$$D{{M}_{total}}=D{{M}_{root}}+D{{M}_{leaf}}+D{{M}_{petiole}}$$
+$$DM_{total}=DM_{root}+DM_{leaf}+DM_{petiole}$$
