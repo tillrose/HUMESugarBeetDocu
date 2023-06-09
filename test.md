@@ -33,3 +33,7 @@ You can also embed plots, for example:
 
 Note that the `echo = FALSE` parameter was added to the code chunk to
 prevent printing of the R code that generated the plot.
+
+## Including Equations
+
+$$D{{M}_{total}}=D{{M}_{root}}+D{{M}_{leaf}}+D{{M}_{petiole}}$$
