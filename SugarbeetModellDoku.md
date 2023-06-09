@@ -1,0 +1,183 @@
+Simulation of sugar beet growth
+================
+Agronomy CAU Kiel
+2023-06-09
+
+# The model
+
+A process-orientated dynamic model was developed which runs on daily
+time steps. Required external data inputs are the mean daily temperature
+\[°C\], precipitation \[mm d-1\], global radiation \[W m-2\], wind speed
+\[m s-1\], relative humidity \[%\] and values derived from these like
+vapour pressure \[mbar\] and saturation deficit \[mbar\]. Temperature
+depended processes are calculated generally using an effective
+temperature (Teff \[°C\]), which is the mean daily air temperature
+\[°C\] (Tair) minus a base temperature (Tb = 3 °C), which is the limit
+for growing processes in sugar beet (Milford et al., 1985).
+
+$${{T}_{eff}}=\,\left\{ \begin{align}
+  & {{T}_{air}}-{{T}_{b}}\ \left| {{T}_{eff}} \right.>0 \\ 
+ & 0\ \ \ \ \ \ \ \ \ \ \left| {{T}_{eff}} \right.\le 0 \\ 
+\end{align} \right.\ $$ The model was implemented using an object
+oriented component library (HUME, Kage and Stützel, 1999a) on the basis
+of Embarcadero® Delphi® 2010 (Embarcadero Technologies, Inc., USA). The
+model is comprised of submodels describing plant growth and development,
+soil water dynamics, and evapotranspiration.
+
+## Plant growth module
+
+### Dry matter production
+
+The simulation of plant growth is based on an approach using light use
+efficiency (LUEPAR \[g MJ PAR-1\]) to calculate dry matter production.
+Leaf area index (LAI \[m2 m-2\]) is thereby used to calculate the
+intercepted photosynthetic active radiation (Q \[MJ
+
+$$Q=0.5\cdot {{R}_{global}}\cdot 1-{{e}^{-{{k}_{PAR}}\cdot LAI}}$$ where
+Rglobal is the global radiation \[MJ m-2\] and kPAR the
+extinction-coefficient for PAR \[-\]. kPAR is assumed to be constant
+(Andrieu et al., 1997). The factor 0.5 reflects the assumption that
+roughly 50% of the incoming global radiation is photosynthetic active
+radiation (PAR \[MJ PAR m-2\]) (Szeicz, 1974). The daily total dry
+matter growth rate \[g m-2 d-1\] is calculated by multiplying the
+intercepted radiation (Q) with the potenial light use efficiency for PAR
+(LUEPAR \[g (MJ PAR)-1\]) and stress factors for drought stress
+(fdroughtLUE \[-\]) and for temperature (ftempLUE \[-\]).
+
+$$\frac{dD{{M}_{total}}}{dt}=Q\cdot LU{{E}_{par}}\cdot {{f}_{droughtLUE}}\cdot {{f}_{tempLUE}}$$
+fdroughtLUE describes the reduction of dry matter production if
+potential transpiration (Tpot \[mm d-1\]) exceeds actual transpiration
+(Tact \[mm d-1\]).
+
+$${{f}_{droughtLUE}}=\frac{{{T}_{act}}}{{{T}_{pot}}}$$ ftempLUE
+describes the reduction of dry matter production due to suboptimal
+temperature. It follows a trapezoidal optimum function, which can be
+described by 4 cardinal temperatures (Tb = minimum temperature for dry
+matter production, T2 and T3 = lower an upper limit of the optimal
+temperature range, T4 = maximum temperature). The values for Tb-T4 for
+the calculations of ftemLUE are obtained from the literature and from
+experiment 1. Specification of the optimum temperatures for growth
+processes in sugar beet varies within the literature. Optimum
+temperature for leaf growth ranges between 19°C (Milford and Riley,
+1980) and 24°C (Terry, 1968) while that for taproot growth was lower
+(12°C (Milford and Riley 1980), 17°C (Terry 1968) or 18 °C (Kenter et
+al., 2006)). Vandendriessche (2000) uses in his model a temperature
+optimum from 10°C to 25°C for sugar beet assimilation. The lower limit
+of the temperature optimum was parameterised using the data of
+experiment 1 and resulted in T2 = 15.5°C. As the upper limit of the
+temperature optimum is unlikely to be reflected in the experimental data
+a value of T3 = 25°C was chosen to cover the mostly mentioned optimum
+temperatures for taproot and leaf growth. T4 as upper limit was set to
+35°C according to Vandendriessche (2000).
+
+### Dry matter partitioning
+
+Total dry matter (DMtotal \[g m-2\]) in the model is partitioned into
+three plant components: root dry matter (DMroot \[g m-2\]), petiole dry
+matter (DMpetiole \[g m-2\]) and leaf dry matter (DMleaf \[g m-2\]).
+DMroot refers to the storage root of the sugar beets.
+
+$$D{{M}_{total}}=D{{M}_{root}}+D{{M}_{leaf}}+D{{M}_{petiole}}$$ In the
+model calculation the growth rate of DMtotal is allocated to its
+components.
+
+$$\frac{dD{{M}_{total}}}{dt}=\frac{dD{{M}_{root}}}{dt}+\frac{dD{{M}_{leaf}}}{dt}+\frac{dD{{M}_{petiole}}}{dt}$$
+The growth rate of DMroot is derived from the growth rate of DMtotal
+using an allocation coefficient f \[-\] which in turn is dependent on
+the amount of DMtotal
+
+$$\frac{dD{{M}_{root}}}{dt}=\frac{dD{{M}_{total}}}{dt}\cdot (f+{{f}_{a}})$$
+with $$f={{({{f}_{a}}\cdot \ln (D{{M}_{total}})+{{f}_{b}})}_{{}}}$$
+where fa and fb are empiric regression coefficients describing slope and
+intercept of a linear regression of f on DMtotal.
+
+$$f={{({{f}_{a}}\cdot \ln (D{{M}_{total}})+{{f}_{b}})}_{{}}}$$ where fa
+and fb are empiric regression coefficients describing slope and
+intercept of a linear regression of f on DMtotal.
+
+In turn the daily growth rate of the shoot (DMshoot) can be calculated
+by subtracting the daily growth rate of DMroot from the daily growth
+rate of DMtotal and DMdead, which is the senescent dry matter (DMdead)
+of the leaves (see Eq. 16).
+$$\frac{dD{{M}_{shoot}}}{dt}=\frac{dD{{M}_{total}}}{dt}-\frac{dD{{M}_{root}}}{dt}-\frac{dD{{M}_{dead}}}{dt}$$
+To distribute the shoot dry matter into DMleaf and DMpetiole an
+allometric relation between DMleaf and DMpetiole is assumed. The
+relative growth rates of DMleaf and DMpetiole exhibit a constant ratio
+leading to a linear function between the natural logarithm of both
+fractions (Eq. 11).
+
+$$\ln (D{{M}_{petiole}})={{f}_{la}}\cdot \ln (D{{M}_{leaf}})+{{f}_{lb}}$$
+where fla and flb \[-\] are regression coefficients. fleaf can then be
+expressed as (Kage and Stützel, 1999b) The growth rates of DMleaf and
+DMpetiole are calculated from the growth rate of DMshoot using fleaf.
+$$\frac{dD{{M}_{leaf}}}{dt}={{f}_{leaf}}\cdot \frac{dD{{M}_{shoot}}}{dt}$$
+
+and
+$$\frac{dD{{M}_{petiole}}}{dt}=(1-{{f}_{leaf}})\cdot \frac{dD{{M}_{shoot}}}{dt}$$
+
+$${{f}_{leaf}}=\frac{1}{1+{{e}^{{{f}_{lb}}}}\cdot {{f}_{la}}\cdot D{{M}_{leaf}}^{(fla-1)}}$$
+
+The sugar growth rate (S) is calculated according to Qi et al. (2005)
+using a sugar partitioning coefficient (SPC).
+
+$$\frac{dS}{dt}=\frac{dD{{M}_{total}}}{dt}\cdot \left( \frac{SPC\cdot D{{M}_{total}}}{1+SPC\cdot D{{M}_{total}}} \right)$$
+\### Leaf area index calculation To calculate the intercepted radiation
+the actual LAI is needed for Eq. 2. It is calculated from DMleaf using
+the specific leaf area (SLA \[cm2 g-1\]).
+$$LAI=\frac{D{{M}_{leaf}}\cdot SLA}{10000}$$
+
+The SLA is calculated depending on the three factors mean temperature
+over ten days (Tmean \[°C\]), mean PAR over ten days (PARmean \[MJ PAR
+m-2\]) and temperature sum (TSum \[°C\]). Tsum is the accumulated Teff
+over time starting from sowing. The parameters were obtained from
+parameterisation using data from experiment 1.
+
+$$SLA=\max (90,({{a}_{SLA}}+{{b}_{SLA}}\cdot {{T}_{mean}}+{{\text{c}}_{\text{SLA}}}\cdot PA{{R}_{\text{mean}}}+{{d}_{SLA}}\cdot {{\text{T}}_{\text{mean}}}\cdot {{\text{T}}_{\text{Sum}}}\text{)}$$
+The dry matter production is initialised by the calculation of the
+temperature-depending leaf area index after emergence (LAIe \[m2 m-2\]).
+This starts if Tsum is greater than the value of the growing degree-days
+needed for emergence (Tem \[°Cd\]). Hoffmann and Kluge-Severin (2011)
+estimated 100 to 130 °Cd to be required for 50% field emergence of
+autumn and spring sown sugar beets, whereas Guérif and Duke (1998)
+reported of 80-150 °Cd. We set Tem to 130 °Cd in our model. The
+determining factors for the exponential early growth of LAIe are plant
+density (SD \[plants m-2\]), leaf area per plant at emergence (LAI0
+\[cm2 plant-1\]), relative growth rate of early canopy growth (RGRl) and
+Tsum and Tem.
+
+$$LA{{I}_{e}}=\frac{LA{{I}_{0}}\cdot S{{D}^{(RG{{R}_{l}}\cdot ({{T}_{sum}}-{{T}_{em}})}})}{10000}$$
+The values for the LAI0 and RGRl are used according to Guérif and Duke
+(1998) while LAIcrit was estimated from experiment 1. In the start phase
+the LAI is replaced by LAIe in Eq. 2. The use of LAIe is limited to a
+threshold (LAIcrit \[-\]). Exceeding this threshold LAI growth is
+assumed to be not only temperature driven but depending on assimilate
+availability. Therefore for LAI \> LAIcrit it is calculated according to
+Eq. 3. To take senescence processes in the canopy into account an
+approach from Gabrielle et al. (1998) was used. The maximum sustainable
+LAI (LAIsusmax \[m2 m-2\]) depending on the incoming radiation is
+calculated as
+
+$$LA{{I}_{sus\max }}=\frac{1}{k}\cdot \log (\frac{PA{{R}_{mean}}}{PA{{R}_{x}}\cdot {{f}_{tempLAI}}})$$
+where PARx is a threshold value for the radiation which is needed to
+maintain leaf net assimilation positive. Below this value the bottom
+leaves will start to become senescent. As the respiration is a process
+depending on temperature PARx is modified by a temperature factor
+ftempLAI, which is based on a Q10 factor of 2 and a reference
+temperature (Tr \[°C\]) of 20°C.
+
+temperature (Tr \[°C\]) of 20°C.
+
+$${{f}_{tempLAI}}={{q}_{10}}^{\frac{^{{{T}_{air}}-{{T}_{r}}}}{10}}$$
+(Eq. 20) If LAI \> LAIsusmax senescence due to low radiation occurs and
+the daily senescence rate LAIs is calculated as
+$$\frac{dLA{{I}_{s}}}{dt}=\,\left\{ \begin{align}
+  & (LAI-LA{{I}_{sus\max }})\cdot {{f}_{sen}}\,\left| LAI>LA{{I}_{sus\max }} \right. \\ 
+ & 0\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\ \,\left| LAI<LA{{I}_{sus\max }} \right.\, \\ 
+\end{align} \right.$$ (Eq. 21) where fsen is a parameter describing the
+portion of LAI that is reduced each day. As a reduction in the LAI due
+to senescence is coupled with a reduction in DMshoot the amount of dead
+dry matter is calculated (DMdead \[g m-2\]).
+$$D{{M}_{dead}}=\frac{LA{{I}_{s}}}{SL{{A}_{dead}}}\cdot 10000$$ (Eq. 22)
+where SLAdead is the SLA of the senescent leaves.
+
+# References
