@@ -46,14 +46,6 @@ processes are calculated generally using an effective temperature (Teff
 temperature (Tb = 3 °C), which is the limit for growing processes in
 sugar beet (Milford et al., 1985).
 
-<!-- $${{T}_{eff}}=\,\left\{ \begin{align} -->
-
-<!--   & {{T}_{air}}-{{T}_{b}}\ \left| {{T}_{eff}} \right.>0 \\  -->
-
-<!--  & 0\ \ \ \ \ \ \ \ \ \ \left| {{T}_{eff}} \right.\le 0 \\  -->
-
-<!-- \end{align} \right.\ $$ -->
-
 The model was implemented using an object oriented component library
 (HUME, Kage and Stützel, 1999a) on the basis of Embarcadero® Delphi®
 2010 (Embarcadero Technologies, Inc., USA). The model is comprised of
